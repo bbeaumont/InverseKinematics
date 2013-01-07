@@ -1,7 +1,6 @@
 package com.wallhax.ik.debug
 {
 	import com.wallhax.ik.IKBone;
-	import com.wallhax.ik.IKJoint;
 	import com.wallhax.ik.IKSkeleton;
 
 	import flash.display.Graphics;
@@ -12,71 +11,78 @@ package com.wallhax.ik.debug
 
 		private var _graphics:Graphics;
 		private var _skeleton:IKSkeleton;
+		private var _color:uint;
 
-		public function IKSkeletonRenderer(skeleton:IKSkeleton, graphics:Graphics)
+		public function IKSkeletonRenderer(skeleton:IKSkeleton, graphics:Graphics, color:uint)
 		{
 			_skeleton = skeleton;
 			_graphics = graphics;
+			_color = color;
 		}
 
 		public function render():void
 		{
 			_graphics.clear();
-			_graphics.lineStyle(1);
-			_graphics.beginFill(0, 0.2);
+			_graphics.lineStyle(1, _color);
+			_graphics.beginFill(_color, 0.2);
 
-			var joint:IKJoint = _skeleton.root;
-			renderJoint(joint);
-			renderChain(joint.bone);
+			var rootBone:IKBone = _skeleton.root;
+			_graphics.moveTo(rootBone.position.x, rootBone.position.y);
+			renderChain(rootBone);
 
-			_graphics.beginFill(0, 0.0);
+			_graphics.beginFill(_color, 0.0);
 			_graphics.drawCircle(_skeleton.root.position.x, _skeleton.root.position.y, _skeleton.totalLength);
 		}
 
-		private function renderChain(bone:IKBone):void
+		private function renderChain(rootBone:IKBone):void
 		{
-			var joint:IKJoint = bone.joint;
-			renderBone(bone.joint.parent, bone);
-			renderJoint(joint);
-			while (joint)
+
+			var bone:IKBone = rootBone;
+			while (true)
 			{
-				if (joint.isSubBase)
+				if (bone.length > 0)
+					renderBone(bone);
+				else
+					renderEffector(bone);
+
+				if (bone.hasChildren)
 				{
-					for (var i:int = 0, len:int = joint.bones.length; i < len; i++)
-					{
-						var bone:IKBone = joint.bones[i];
-						renderChain(bone);
-					}
-				}
-				else if (joint.isEnd)
-				{
-					break;
+
+					bone = bone.children[0];
 				}
 				else
-				{
-					renderBone(joint, joint.bone);
-				}
-				joint = joint.bone.joint;
+					break;
 			}
 		}
 
-		private function renderBone(preJoint:IKJoint, bone:IKBone):void
+		private function renderEffector(bone:IKBone):void
 		{
-			_graphics.moveTo(preJoint.position.x, preJoint.position.y);
-			_graphics.lineTo(bone.joint.position.x, bone.joint.position.y);
-			renderJoint(bone.joint);
+			_graphics.drawCircle(bone.globalPosition.x, bone.globalPosition.y, 5);
 		}
 
 		private static const JOINT_SIZE:int = 10;
 
-		private function renderJoint(joint:IKJoint):void
+		private function renderBone(bone:IKBone):void
 		{
-			_graphics.drawCircle(joint.position.x, joint.position.y, JOINT_SIZE);
-			_graphics.lineStyle(3, 0xFF0000);
-			_graphics.moveTo(joint.position.x, joint.position.y);
-			var rot:Vector3D = joint.transform.transformVector(new Vector3D(0, JOINT_SIZE, 0));
-			_graphics.lineTo(rot.x, rot.y);
-			_graphics.lineStyle(1, 0);
+			const ql:Number = bone.length*0.25;
+			_graphics.moveTo(bone.globalPosition.x, bone.globalPosition.y);
+			var v:Vector3D = bone.globalTransform.transformVector(new Vector3D(5, ql, 5));
+			_graphics.lineTo(v.x, v.y);
+			var v:Vector3D = bone.globalTransform.transformVector(new Vector3D(0, bone.length, 0));
+			_graphics.lineTo(v.x, v.y);
+			var v:Vector3D = bone.globalTransform.transformVector(new Vector3D(-5, ql, -5));
+			_graphics.lineTo(v.x, v.y);
+			_graphics.lineTo(bone.globalPosition.x, bone.globalPosition.y);
+
+
+//			_graphics.drawCircle(bone.position.x, bone.position.y, JOINT_SIZE);
+//
+//			_graphics.lineStyle(2, 0xFF0000);
+//			_graphics.moveTo(bone.position.x, bone.position.y);
+//			_graphics.lineTo(rot.x, rot.y);
+//			_graphics.lineStyle(1, 0);
+//			_graphics.moveTo(bone.position.x, bone.position.y);
+//			_graphics.lineTo(bone.position.x, bone.position.y);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 package com.wallhax.ik.solvers
 {
-	import com.wallhax.ik.IKJoint;
+	import com.wallhax.ik.IKBone;
 	import com.wallhax.ik.IKSkeleton;
 
 	import flash.geom.Vector3D;
@@ -9,7 +9,7 @@ package com.wallhax.ik.solvers
 	{
 		private static const TOL:Number = 0.1;
 		private static const TOL_SQ:Number = TOL*TOL;
-		private var _endJoint:IKJoint;
+		private var _endJoint:IKBone;
 
 		private var _damping:Number = 1.0;
 
@@ -50,33 +50,34 @@ package com.wallhax.ik.solvers
 			if (!_target)
 				return;
 
-//			_dtp = _endJoint.position;
-//			const targetDelta:Number = _skeleton.root.position.subtract(_dtp).length;
-//			if (targetDelta > _skeleton.totalLength)
-//			{
-//				solveUnreachable(_target);
-//			}
-//			else
-//			{
+			_dtp = _endJoint.globalPosition;
+			const targetDelta:Number = _skeleton.root.globalPosition.subtract(_target).lengthSquared;
+
+			if (targetDelta > _skeleton.totalLengthSquared)
+			{
+				solveUnreachable(_target);
+			}
+			else
+			{
 				solveReachable(_target);
-//			}
+			}
 		}
 
 		private var _dtp:Vector3D;
 
 		private function solveReachable(target:Vector3D):void
 		{
-			var difa:Number = _endJoint.position.subtract(target).lengthSquared;
+			var difa:Number = _endJoint.globalPosition.subtract(target).lengthSquared;
 			var tries:int = 0;
 			while (difa > TOL_SQ && tries++ < 100)
 			{
-				_dtp = _endJoint.position;
+				_dtp = _endJoint.globalPosition;
 				_dtp.x = _dtp.x + (target.x - _dtp.x)*_damping;
 				_dtp.y = _dtp.y + (target.y - _dtp.y)*_damping;
-				_endJoint.position = _dtp;
+				_endJoint.globalPosition = _dtp;
 				forwardReaching(target, _endJoint);
 				backwardReaching(target);
-				difa = _endJoint.position.subtract(target).lengthSquared;
+				difa = _endJoint.globalPosition.subtract(target).lengthSquared;
 			}
 		}
 
@@ -84,56 +85,56 @@ package com.wallhax.ik.solvers
 		{
 
 			var r:Number, gamma:Number, gamma2:Number;
-			var nextJoint:IKJoint;
-			var joint:IKJoint = _skeleton.root;
-			while (joint.bone)
+			var nextBone:IKBone;
+			var bone:IKBone = _skeleton.root;
+			while (!bone.isEnd)
 			{
-				nextJoint = joint.bone.joint;
+				nextBone = bone.children[0];
 
-				r = nextJoint.position.subtract(joint.position).length;
+				r = nextBone.globalPosition.subtract(bone.globalPosition).length;
 
-				gamma = joint.bone.length/r;
+				gamma = bone.length/r;
 				gamma2 = 1 - gamma;
 
-				var p:Vector3D = nextJoint.position;
-				p.x = gamma2*joint.position.x + gamma*nextJoint.position.x;
-				p.y = gamma2*joint.position.y + gamma*nextJoint.position.y;
-				nextJoint.position = p;
-				nextJoint.transform.pointAt(joint.transform.position);
+				var p:Vector3D = nextBone.globalPosition;
+				p.x = gamma2*bone.globalPosition.x + gamma*nextBone.globalPosition.x;
+				p.y = gamma2*bone.globalPosition.y + gamma*nextBone.globalPosition.y;
+				nextBone.globalPosition = p;
+				bone.globalTransform.pointAt(nextBone.globalPosition);
 
-				joint = nextJoint;
+				bone = nextBone;
 			}
 		}
 
-		private function forwardReaching(target:Vector3D, endJoint:IKJoint):void
+		private function forwardReaching(target:Vector3D, endJoint:IKBone):void
 		{
 
 			var r:Number, gamma:Number, gamma2:Number;
-			var nextJoint:IKJoint;
-			var joint:IKJoint = endJoint;
+			var nextBone:IKBone;
+			var bone:IKBone = endJoint;
 
-			while (joint)
+			while (bone)
 			{
-				if (joint != _skeleton.root || !_skeleton.root.fixed)
+				if (bone != _skeleton.root || !_skeleton.root.fixed)
 				{
-					if (joint.bone)
+					if (!bone.isEnd)
 					{
-						nextJoint = joint.bone.joint;
+						nextBone = bone.children[0];
 
-						r = nextJoint.position.subtract(joint.position).length;
-						gamma = joint.bone.length/r;
+						r = nextBone.globalPosition.subtract(bone.globalPosition).length;
+						gamma = bone.length/r;
 						gamma2 = 1 - gamma;
 
-						var p:Vector3D = joint.position;
+						var p:Vector3D = bone.globalPosition;
 
-						p.x = gamma2*nextJoint.position.x + gamma*joint.position.x;
-						p.y = gamma2*nextJoint.position.y + gamma*joint.position.y;
+						p.x = gamma2*nextBone.globalPosition.x + gamma*bone.globalPosition.x;
+						p.y = gamma2*nextBone.globalPosition.y + gamma*bone.globalPosition.y;
 
-						joint.position = p;
+						bone.globalPosition = p;
 
 					}
 
-					joint = joint.parent;
+					bone = bone.parent;
 				}
 				else
 				{
@@ -142,36 +143,42 @@ package com.wallhax.ik.solvers
 			}
 		}
 
-		private function getEndJoint():IKJoint
+		private function getEndJoint():IKBone
 		{
-			var endJoint:IKJoint = _skeleton.root;
-			while (endJoint.bone)
+			var endBone:IKBone = _skeleton.root;
+			do
 			{
-				endJoint = endJoint.bone.joint;
+				if (endBone.hasChildren)
+					endBone = endBone.children[0];
+				else
+					break;
 			}
-			return endJoint;
+			while (true);
+
+			return endBone;
 		}
 
 		private function solveUnreachable(target:Vector3D):void
 		{
 			var r:Number, gamma:Number, gamma2:Number;
-			var nextJoint:IKJoint;
-			var joint:IKJoint = _skeleton.root;
-			while (joint.bone)
+			var nextBone:IKBone;
+			var bone:IKBone = _skeleton.root;
+			while (bone.hasChildren)
 			{
-				nextJoint = joint.bone.joint;
+				nextBone = bone.children[0];
 
-				r = target.subtract(joint.position).length;
-				gamma = joint.bone.length/r;
+				r = target.subtract(bone.globalPosition).length;
+				gamma = bone.length/r;
 				gamma2 = 1 - gamma;
 
-				var p:Vector3D = nextJoint.position;
+				var p:Vector3D = nextBone.globalPosition;
 
-				p.x = gamma2*joint.position.x + gamma*target.x;
-				p.y = gamma2*joint.position.y + gamma*target.y;
-				nextJoint.transform.position = p;
+				p.x = gamma2*bone.globalPosition.x + gamma*target.x;
+				p.y = gamma2*bone.globalPosition.y + gamma*target.y;
+				nextBone.globalPosition = p;
+				bone.globalTransform.pointAt(nextBone.globalPosition);
 
-				joint = nextJoint;
+				bone = nextBone;
 			}
 		}
 	}
