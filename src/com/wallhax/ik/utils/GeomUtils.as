@@ -45,11 +45,6 @@ package com.wallhax.ik.utils
 		}
 
 
-		public static function toDeg(radians:Number):Number
-		{
-			return radians*180/Math.PI;
-		}
-
 		public static function rotate2D(input:Vector3D, angle:Number):void
 		{
 			input.x = Math.cos(angle)*input.x - Math.sin(angle)*input.y;

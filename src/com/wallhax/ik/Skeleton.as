@@ -1,10 +1,8 @@
 package com.wallhax.ik
 {
-	import flash.geom.Matrix3D;
-
-	public class IKSkeleton
+	public class Skeleton
 	{
-		public var root:IKBone;
+		public var root:Bone;
 
 		private var _totalLength:Number;
 
@@ -22,36 +20,14 @@ package com.wallhax.ik
 			return _totalLengthSquared;
 		}
 
-		public function IKSkeleton()
-		{
-		}
-
-		public function addRoot(rootJoint:IKBone):void
+		public function addRoot(rootJoint:Bone):void
 		{
 			root = rootJoint;
 		}
 
-		private function getLength():void
-		{
-			if (isNaN(_totalLength))
-			{
-				_totalLength = 0.0;
-				var bone:IKBone = root;
-				while (bone)
-				{
-					_totalLength += bone.length;
-					if (bone.hasChildren)
-						bone = bone.children[0];
-					else
-						bone = null;
-				}
-				_totalLengthSquared = _totalLength*_totalLength;
-			}
-		}
-
 		public function updateTransforms():void
 		{
-			var bone:IKBone = root;
+			var bone:Bone = root;
 			while (bone)
 			{
 				if (bone.parent)
@@ -65,6 +41,24 @@ package com.wallhax.ik
 				}
 
 				bone = (bone.hasChildren) ? bone.children[0] : null;
+			}
+		}
+
+		private function getLength():void
+		{
+			if (isNaN(_totalLength))
+			{
+				_totalLength = 0.0;
+				var bone:Bone = root;
+				while (bone)
+				{
+					_totalLength += bone.length;
+					if (bone.hasChildren)
+						bone = bone.children[0];
+					else
+						bone = null;
+				}
+				_totalLengthSquared = _totalLength*_totalLength;
 			}
 		}
 	}

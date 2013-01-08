@@ -1,6 +1,0 @@
-The beginnings of an inverse kinematics library. At the moment it is simply a set of experiments and does not contain anything that practically useful.
-Current status:
-
-* FABRIK based solver is working for single chains. See http://www.andreasaristidou.com/publications/CUEDF-INFENG,%20TR-632.pdf
-* CCD is not working correctly. http://www.darwin3d.com/gamedev/articles/col1198.pdf
-

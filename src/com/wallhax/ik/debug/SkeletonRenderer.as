@@ -1,19 +1,21 @@
 package com.wallhax.ik.debug
 {
-	import com.wallhax.ik.IKBone;
-	import com.wallhax.ik.IKSkeleton;
+	import com.wallhax.ik.Bone;
+	import com.wallhax.ik.Skeleton;
 
 	import flash.display.Graphics;
 	import flash.geom.Vector3D;
 
-	public class IKSkeletonRenderer
+	public class SkeletonRenderer
 	{
 
-		private var _graphics:Graphics;
-		private var _skeleton:IKSkeleton;
-		private var _color:uint;
+		private static const JOINT_SIZE:int = 10;
 
-		public function IKSkeletonRenderer(skeleton:IKSkeleton, graphics:Graphics, color:uint)
+		private var _color:uint;
+		private var _graphics:Graphics;
+		private var _skeleton:Skeleton;
+
+		public function SkeletonRenderer(skeleton:Skeleton, graphics:Graphics, color:uint)
 		{
 			_skeleton = skeleton;
 			_graphics = graphics;
@@ -26,7 +28,7 @@ package com.wallhax.ik.debug
 			_graphics.lineStyle(1, _color);
 			_graphics.beginFill(_color, 0.2);
 
-			var rootBone:IKBone = _skeleton.root;
+			var rootBone:Bone = _skeleton.root;
 			_graphics.moveTo(rootBone.position.x, rootBone.position.y);
 			renderChain(rootBone);
 
@@ -34,10 +36,10 @@ package com.wallhax.ik.debug
 			_graphics.drawCircle(_skeleton.root.position.x, _skeleton.root.position.y, _skeleton.totalLength);
 		}
 
-		private function renderChain(rootBone:IKBone):void
+		private function renderChain(rootBone:Bone):void
 		{
 
-			var bone:IKBone = rootBone;
+			var bone:Bone = rootBone;
 			while (true)
 			{
 				if (bone.length > 0)
@@ -55,22 +57,21 @@ package com.wallhax.ik.debug
 			}
 		}
 
-		private function renderEffector(bone:IKBone):void
+		private function renderEffector(bone:Bone):void
 		{
 			_graphics.drawCircle(bone.globalPosition.x, bone.globalPosition.y, 5);
 		}
 
-		private static const JOINT_SIZE:int = 10;
-
-		private function renderBone(bone:IKBone):void
+		private function renderBone(bone:Bone):void
 		{
-			const ql:Number = bone.length*0.25;
+			var v:Vector3D;
+			const quarter:Number = bone.length*0.25;
 			_graphics.moveTo(bone.globalPosition.x, bone.globalPosition.y);
-			var v:Vector3D = bone.globalTransform.transformVector(new Vector3D(5, ql, 5));
+			v = bone.globalTransform.transformVector(new Vector3D(quarter, 5, 5));
 			_graphics.lineTo(v.x, v.y);
-			var v:Vector3D = bone.globalTransform.transformVector(new Vector3D(0, bone.length, 0));
+			v = bone.globalTransform.transformVector(new Vector3D(bone.length, 0, 0));
 			_graphics.lineTo(v.x, v.y);
-			var v:Vector3D = bone.globalTransform.transformVector(new Vector3D(-5, ql, -5));
+			v = bone.globalTransform.transformVector(new Vector3D(quarter, -5, -5));
 			_graphics.lineTo(v.x, v.y);
 			_graphics.lineTo(bone.globalPosition.x, bone.globalPosition.y);
 

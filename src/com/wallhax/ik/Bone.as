@@ -1,24 +1,19 @@
 package com.wallhax.ik
 {
-	import com.wallhax.ik.utils.GeomUtils;
-
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
-	import mx.collections.HierarchicalData;
-
-	public class IKBone
+	public class Bone
 	{
-		public var children:Vector.<IKBone> = new Vector.<IKBone>();
-		public var fixed:Boolean;
-		public var parent:IKBone;
+		public var children:Vector.<Bone> = new Vector.<Bone>();
+		public var parent:Bone;
 		public var transform:Matrix3D = new Matrix3D();
 		public var length:Number = 0.0;
 		private var _globalTransform:Matrix3D = new Matrix3D();
 
-		public function get isEnd():Boolean
+		public function get isEndEffector():Boolean
 		{
-			return children.length == 0;
+			return children.length == 0 && length == 0.0;
 		}
 
 		public function get isSubBase():Boolean
@@ -31,28 +26,25 @@ package com.wallhax.ik
 			return children.length > 0;
 		}
 
-		public function IKBone()
+		public function createChild(length:Number, angle:Number = 0.0):Bone
 		{
-		}
+			var childTransform:Matrix3D = new Matrix3D();
+			childTransform.prependRotation(angle, Vector3D.Z_AXIS);
+			childTransform.prependTranslation(this.length, 0.0, 0.0);
 
-		public function createChild(length:Number, angle:Number):IKBone
-		{
-			var child:IKBone = new IKBone();
+			var child:Bone = new Bone();
 			child.parent = this;
-//			child.transform.prepend(transform);
-
-			var tf:Matrix3D = new Matrix3D();
-			tf.prependRotation(GeomUtils.toDeg(angle), new Vector3D(0, 0, 1));
-			tf.prependTranslation(0.0, this.length, 0.0);
-			child.transform = tf;
-
-
-//			child.transform.prependRotation(GeomUtils.toDeg(angle), new Vector3D(0, 0, 1));
-//			child.transform.prependTranslation(0.0, length, 0.0);
 			child.length = length;
+			child.transform = childTransform;
 
 			children.push(child);
+
 			return child;
+		}
+
+		public function createEndEffector():Bone
+		{
+			return createChild(0.0, 0.0);
 		}
 
 		public function get position():Vector3D
