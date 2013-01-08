@@ -17,11 +17,12 @@ package com.wallhax.ik.utils
 			for (var i:int = 0, len:int = vertices.length - 1; i < len; i++)
 			{
 				const vertex:Vector3D = vertices[i];
+				const nextVertex:Vector3D = vertices[i + 1];
 
 				x0 = vertex.x;
 				y0 = vertex.y;
-				x1 = vertex.x;
-				y1 = vertex.y;
+				x1 = nextVertex.x;
+				y1 = nextVertex.y;
 				a = x0*y1 - x1*y0;
 				signedArea += a;
 				centroid.x += (x0 + x1)*a;
@@ -49,6 +50,23 @@ package com.wallhax.ik.utils
 		{
 			input.x = Math.cos(angle)*input.x - Math.sin(angle)*input.y;
 			input.y = Math.sin(angle)*input.x + Math.cos(angle)*input.y;
+		}
+
+		public static function getPointsCentroid(vertices:Vector.<Vector3D>):Vector3D
+		{
+			var centroid:Vector3D = new Vector3D();
+			for (var i:int = 0, len:int = vertices.length; i < len; i++)
+			{
+				var vector3D:Vector3D = vertices[i];
+				centroid.x += vector3D.x;
+				centroid.y += vector3D.y;
+				centroid.z += vector3D.z;
+			}
+			centroid.x /= vertices.length;
+			centroid.y /= vertices.length;
+			centroid.z /= vertices.length;
+
+			return centroid;
 		}
 	}
 }
