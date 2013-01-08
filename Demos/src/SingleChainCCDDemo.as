@@ -5,7 +5,6 @@ package
 	import com.wallhax.ik.Skeleton;
 	import com.wallhax.ik.debug.SkeletonRenderer;
 	import com.wallhax.ik.solvers.SingleChainCCD;
-	import com.wallhax.ik.solvers.SingleChainFABRIK;
 	import com.wallhax.ik.solvers.Solver;
 
 	import flash.display.Shape;
@@ -57,7 +56,7 @@ package
 		{
 			_solver = new SingleChainCCD();
 			_solver.skeleton = _skeleton;
-			_skeleton.updateTransforms();
+//			_skeleton.updateTransforms();
 		}
 
 		private function buildSkeleton():void

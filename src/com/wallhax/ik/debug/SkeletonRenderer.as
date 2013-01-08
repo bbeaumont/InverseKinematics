@@ -67,11 +67,11 @@ package com.wallhax.ik.debug
 			var v:Vector3D;
 			const quarter:Number = bone.length*0.25;
 			_graphics.moveTo(bone.globalPosition.x, bone.globalPosition.y);
-			v = bone.globalTransform.transformVector(new Vector3D(quarter, 5, 5));
+			v = bone.globalTransform.transformVector(new Vector3D(5, quarter, 5));
 			_graphics.lineTo(v.x, v.y);
-			v = bone.globalTransform.transformVector(new Vector3D(bone.length, 0, 0));
+			v = bone.globalTransform.transformVector(new Vector3D(0, bone.length, 0));
 			_graphics.lineTo(v.x, v.y);
-			v = bone.globalTransform.transformVector(new Vector3D(quarter, -5, -5));
+			v = bone.globalTransform.transformVector(new Vector3D(-5, quarter, -5));
 			_graphics.lineTo(v.x, v.y);
 			_graphics.lineTo(bone.globalPosition.x, bone.globalPosition.y);
 

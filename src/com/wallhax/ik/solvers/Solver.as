@@ -11,7 +11,5 @@ package com.wallhax.ik.solvers
 		function solve():void;
 
 		function set target(value:Vector3D):void;
-
-		function set damping(damping:Number):void;
 	}
 }

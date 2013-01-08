@@ -38,11 +38,6 @@ package com.wallhax.ik.solvers
 			_target = value;
 		}
 
-		public function set damping(damping:Number):void
-		{
-
-		}
-
 		public function solve():void
 		{
 			if (!_targetPosition)
@@ -94,7 +89,6 @@ package com.wallhax.ik.solvers
 							bone.transform.recompose(components);
 						}
 					}
-
 				}
 				_skeleton.updateTransforms();
 				if (bone == _skeleton.root)

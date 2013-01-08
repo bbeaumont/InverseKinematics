@@ -30,16 +30,7 @@ package com.wallhax.ik
 			var bone:Bone = root;
 			while (bone)
 			{
-				if (bone.parent)
-				{
-					bone.globalTransform.copyFrom(bone.parent.globalTransform);
-					bone.globalTransform.prepend(bone.transform);
-				}
-				else
-				{
-					bone.globalTransform.copyFrom(bone.transform);
-				}
-
+				bone.updateGlobalTransform();
 				bone = (bone.hasChildren) ? bone.children[0] : null;
 			}
 		}

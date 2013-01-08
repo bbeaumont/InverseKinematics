@@ -11,12 +11,6 @@ package com.wallhax.ik.solvers
 		private static const TOL_SQ:Number = TOL*TOL;
 
 		private var _endEffector:Bone;
-		private var _damping:Number = 1.0;
-
-		public function set damping(damping:Number):void
-		{
-			_damping = damping;
-		}
 
 		private var _skeleton:Skeleton;
 
@@ -50,13 +44,9 @@ package com.wallhax.ik.solvers
 		{
 			var targetToEndEffectorDelta:Number = _endEffector.globalPosition.subtract(_target).lengthSquared;
 			var tries:int = 0;
-			var endEffectorPosition:Vector3D;
 			while (targetToEndEffectorDelta > TOL_SQ && tries++ < 100)
 			{
-				endEffectorPosition = _endEffector.globalPosition;
-				endEffectorPosition.x = endEffectorPosition.x + (_target.x - endEffectorPosition.x)*_damping;
-				endEffectorPosition.y = endEffectorPosition.y + (_target.y - endEffectorPosition.y)*_damping;
-				_endEffector.globalPosition = endEffectorPosition;
+				_endEffector.globalPosition = _target;
 
 				forwardReaching();
 				backwardReaching();
@@ -86,7 +76,6 @@ package com.wallhax.ik.solvers
 				globalPosition.y = inverseGamma*bone.globalPosition.y + gamma*nextBone.globalPosition.y;
 
 				nextBone.globalPosition = globalPosition;
-				bone.globalTransform.pointAt(nextBone.globalPosition, Vector3D.X_AXIS);
 
 				bone = nextBone;
 			}
@@ -116,6 +105,7 @@ package com.wallhax.ik.solvers
 						globalPosition.y = inverseGamma*nextBone.globalPosition.y + gamma*bone.globalPosition.y;
 
 						bone.globalPosition = globalPosition;
+
 					}
 					bone = bone.parent;
 				}
@@ -161,8 +151,6 @@ package com.wallhax.ik.solvers
 				globalPosition.y = inverseGamma*bone.globalPosition.y + gamma*_target.y;
 
 				nextBone.globalPosition = globalPosition;
-				bone.globalTransform.pointAt(nextBone.globalPosition, Vector3D.X_AXIS);
-
 				bone = nextBone;
 			}
 		}

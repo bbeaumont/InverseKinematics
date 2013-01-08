@@ -56,7 +56,6 @@ package
 		{
 			_solver = new SingleChainFABRIK();
 			_solver.skeleton = _skeleton;
-			_skeleton.updateTransforms();
 		}
 
 		private function buildSkeleton():void
@@ -68,7 +67,7 @@ package
 			var bone:Bone = rootBone.createChild(GAP, 0.0);
 			for (var i:int = 0; i < 10; i++)
 				bone = bone.createChild(GAP, 0.0);
-			bone.createEndEffector();
+			var end:Bone = bone.createEndEffector();
 
 			_skeleton = new Skeleton();
 			_skeleton.addRoot(rootBone);
@@ -98,6 +97,7 @@ package
 			if (_skeletonRenderer)
 				_skeletonRenderer.render();
 		}
+
 
 		private function onEnterFrame(event:Event):void
 		{
